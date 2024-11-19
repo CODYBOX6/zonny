@@ -1,25 +1,29 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Learn Singleton Design Pattern</title>
+    <title>Apprendre le Singleton en Java</title>
     <script src="script.js" defer></script>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-900 text-white min-h-screen flex items-center justify-center">
-    <div class="container mx-auto p-6 text-center">
-        <h1 class="text-4xl font-bold text-yellow-400 mb-6">Understanding the Singleton Design Pattern</h1>
-        
-        <div id="concepts" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <!-- Each concept will be added dynamically by JavaScript -->
-        </div>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center p-6">
+    <h1 class="text-4xl font-bold text-yellow-400 mb-8">Le Design Pattern Singleton</h1>
+    
+    <p class="text-lg text-gray-300 mb-6 max-w-3xl text-center">
+        Découvre le <span class="text-yellow-400 font-semibold">Singleton</span>, un design pattern essentiel en Java, à travers des notes interactives et des analogies amusantes !
+    </p>
 
-        <div class="mt-8">
-            <button id="resetButton" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded shadow">
-                Reset All Zooms
-            </button>
-        </div>
+    <div id="notes-container" class="w-full max-w-4xl space-y-6">
+        <!-- Les notes interactives seront insérées ici -->
     </div>
+
+    <div id="memory-container" class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-12 max-w-4xl">
+        <!-- Les cartes Memory seront insérées ici -->
+    </div>
+
+    <footer class="mt-12 text-gray-500 text-sm">
+        Créé avec ❤️ pour t'aider à comprendre le Singleton.
+    </footer>
 </body>
 </html>
