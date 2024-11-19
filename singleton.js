@@ -1,3 +1,4 @@
+// Liste des notes sur le Singleton
 const notes = [
     {
         title: "Définition du Singleton",
