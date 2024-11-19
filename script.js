@@ -1,93 +1,78 @@
-const grid = document.getElementById("grid");
-const scoreDisplay = document.getElementById("score");
-
-const cardData = [
-    { id: 1, text: "Singleton", definition: "Un design pattern qui garantit qu'une classe n'a qu'une seule instance" },
-    { id: 2, text: "getInstance()", definition: "Une méthode qui retourne l'instance unique de la classe" },
-    { id: 3, text: "private Constructor", definition: "Empêche la création d'instances supplémentaires en dehors de la classe" },
-    { id: 4, text: "Thread Safety", definition: "Assure que l'instance est correctement initialisée dans un environnement multithread" }
+const concepts = [
+    {
+        title: "Singleton Definition",
+        description: "A design pattern that ensures a class has only one instance and provides a global point of access to it.",
+    },
+    {
+        title: "Private Constructor",
+        description: "Prevents instantiation of the class from outside, ensuring only one instance can be created.",
+    },
+    {
+        title: "getInstance() Method",
+        description: "A static method that returns the single instance of the class, creating it if necessary.",
+    },
+    {
+        title: "Thread Safety",
+        description: "In multithreaded environments, ensures that only one instance is created, even if multiple threads try to access it simultaneously.",
+    },
+    {
+        title: "Example Code",
+        description: `public class Singleton {
+    private static Singleton instance;
+    private Singleton() {}
+    public static Singleton getInstance() {
+        if (instance == null) {
+            instance = new Singleton();
+        }
+        return instance;
+    }
+}`,
+    },
+    {
+        title: "Real-Life Use Case",
+        description: "Singleton is used in loggers, configuration managers, and database connections.",
+    },
 ];
 
-let cards = [];
-let flippedCards = [];
-let score = 0;
+// Add each concept dynamically to the HTML
+const conceptsContainer = document.getElementById("concepts");
 
-// Mélange les cartes
-function shuffle(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
-}
+concepts.forEach((concept, index) => {
+    const card = document.createElement("div");
+    card.classList.add(
+        "bg-gray-800",
+        "rounded-lg",
+        "shadow-lg",
+        "p-6",
+        "transform",
+        "transition",
+        "duration-300",
+        "hover:scale-105",
+        "cursor-pointer"
+    );
 
-// Crée les cartes (questions et réponses mélangées)
-function createGrid() {
-    const fullDeck = shuffle([...cardData, ...cardData.map(card => ({ ...card, isDefinition: true }))]);
+    // Content of each card
+    card.innerHTML = `
+        <h2 class="text-xl font-bold text-yellow-400 mb-4">${concept.title}</h2>
+        <p class="text-sm">${concept.description}</p>
+    `;
 
-    fullDeck.forEach((item, index) => {
-        const card = document.createElement("div");
-        card.classList.add(
-            "w-40",
-            "h-20",
-            "rounded-lg",
-            "bg-blue-500",
-            "flex",
-            "items-center",
-            "justify-center",
-            "text-white",
-            "font-bold",
-            "cursor-pointer"
-        );
-        card.setAttribute("data-id", item.id);
-        card.setAttribute("data-type", item.isDefinition ? "definition" : "term");
-        card.textContent = item.isDefinition ? item.definition : item.text;
-
-        card.addEventListener("click", () => flipCard(card));
-        grid.appendChild(card);
-        cards.push(card);
-    });
-}
-
-// Gère le retournement des cartes
-function flipCard(card) {
-    if (flippedCards.length < 2 && !card.classList.contains("bg-green-500")) {
-        card.classList.remove("bg-blue-500");
-        card.classList.add("bg-yellow-400");
-        flippedCards.push(card);
-
-        if (flippedCards.length === 2) {
-            checkMatch();
+    // Add zoom-in and zoom-out effect on click
+    card.addEventListener("click", () => {
+        if (card.classList.contains("scale-125")) {
+            card.classList.remove("scale-125");
+        } else {
+            // Remove zoom from all other cards first
+            document.querySelectorAll(".scale-125").forEach((el) => el.classList.remove("scale-125"));
+            card.classList.add("scale-125");
         }
-    }
-}
+    });
 
-// Vérifie si les deux cartes retournées correspondent
-function checkMatch() {
-    const [card1, card2] = flippedCards;
+    // Append the card to the container
+    conceptsContainer.appendChild(card);
+});
 
-    if (
-        card1.getAttribute("data-id") === card2.getAttribute("data-id") &&
-        card1.getAttribute("data-type") !== card2.getAttribute("data-type")
-    ) {
-        card1.classList.remove("bg-yellow-400");
-        card1.classList.add("bg-green-500");
-        card2.classList.remove("bg-yellow-400");
-        card2.classList.add("bg-green-500");
-
-        score += 10;
-        scoreDisplay.textContent = score;
-    } else {
-        setTimeout(() => {
-            card1.classList.remove("bg-yellow-400");
-            card1.classList.add("bg-blue-500");
-            card2.classList.remove("bg-yellow-400");
-            card2.classList.add("bg-blue-500");
-        }, 1000);
-    }
-
-    flippedCards = [];
-}
-
-// Démarre le jeu
-createGrid();
+// Reset all zooms
+document.getElementById("resetButton").addEventListener("click", () => {
+    document.querySelectorAll(".scale-125").forEach((el) => el.classList.remove("scale-125"));
+});
