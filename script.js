@@ -1,117 +1,93 @@
 const grid = document.getElementById("grid");
 const scoreDisplay = document.getElementById("score");
 
-const gridSize = 8;
-const candyColors = ["bg-red-500", "bg-yellow-400", "bg-green-500", "bg-blue-500", "bg-purple-500"];
-let candies = [];
+const cardData = [
+    { id: 1, text: "Singleton", definition: "Un design pattern qui garantit qu'une classe n'a qu'une seule instance" },
+    { id: 2, text: "getInstance()", definition: "Une méthode qui retourne l'instance unique de la classe" },
+    { id: 3, text: "private Constructor", definition: "Empêche la création d'instances supplémentaires en dehors de la classe" },
+    { id: 4, text: "Thread Safety", definition: "Assure que l'instance est correctement initialisée dans un environnement multithread" }
+];
+
+let cards = [];
+let flippedCards = [];
 let score = 0;
 
-// Initialiser la grille
+// Mélange les cartes
+function shuffle(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+// Crée les cartes (questions et réponses mélangées)
 function createGrid() {
-    for (let i = 0; i < gridSize * gridSize; i++) {
-        const candy = document.createElement("div");
-        candy.classList.add("w-12", "h-12", "rounded-lg", candyColors[Math.floor(Math.random() * candyColors.length)], "cursor-pointer");
-        candy.setAttribute("draggable", true);
-        candy.setAttribute("id", i);
-        grid.appendChild(candy);
-        candies.push(candy);
-    }
+    const fullDeck = shuffle([...cardData, ...cardData.map(card => ({ ...card, isDefinition: true }))]);
+
+    fullDeck.forEach((item, index) => {
+        const card = document.createElement("div");
+        card.classList.add(
+            "w-40",
+            "h-20",
+            "rounded-lg",
+            "bg-blue-500",
+            "flex",
+            "items-center",
+            "justify-center",
+            "text-white",
+            "font-bold",
+            "cursor-pointer"
+        );
+        card.setAttribute("data-id", item.id);
+        card.setAttribute("data-type", item.isDefinition ? "definition" : "term");
+        card.textContent = item.isDefinition ? item.definition : item.text;
+
+        card.addEventListener("click", () => flipCard(card));
+        grid.appendChild(card);
+        cards.push(card);
+    });
 }
 
-// Vérifier les matches
-function checkMatches() {
-    // Lignes horizontales
-    for (let i = 0; i < gridSize * gridSize; i++) {
-        const rowStart = Math.floor(i / gridSize) * gridSize;
-        const row = [i, i + 1, i + 2];
-        if (row.every(index => candies[index] && candies[index].className === candies[i].className)) {
-            row.forEach(index => {
-                candies[index].className = "w-12 h-12 rounded-lg bg-gray-200"; // Grise après match
-                score += 10;
-            });
-        }
-    }
+// Gère le retournement des cartes
+function flipCard(card) {
+    if (flippedCards.length < 2 && !card.classList.contains("bg-green-500")) {
+        card.classList.remove("bg-blue-500");
+        card.classList.add("bg-yellow-400");
+        flippedCards.push(card);
 
-    // Colonnes verticales
-    for (let i = 0; i < gridSize * (gridSize - 2); i++) {
-        const column = [i, i + gridSize, i + gridSize * 2];
-        if (column.every(index => candies[index] && candies[index].className === candies[i].className)) {
-            column.forEach(index => {
-                candies[index].className = "w-12 h-12 rounded-lg bg-gray-200";
-                score += 10;
-            });
-        }
-    }
-
-    scoreDisplay.textContent = score;
-}
-
-// Faire tomber les bonbons
-function dropCandies() {
-    for (let i = gridSize * (gridSize - 1) - 1; i >= 0; i--) {
-        if (candies[i].className === "w-12 h-12 rounded-lg bg-gray-200") {
-            candies[i].className = candies[i - gridSize] ? candies[i - gridSize].className : candyColors[Math.floor(Math.random() * candyColors.length)];
-            if (candies[i - gridSize]) candies[i - gridSize].className = "w-12 h-12 rounded-lg bg-gray-200";
+        if (flippedCards.length === 2) {
+            checkMatch();
         }
     }
 }
 
-// Drag and drop
-let candyBeingDragged, candyBeingReplaced;
+// Vérifie si les deux cartes retournées correspondent
+function checkMatch() {
+    const [card1, card2] = flippedCards;
 
-candies.forEach(candy => {
-    candy.addEventListener("dragstart", dragStart);
-    candy.addEventListener("dragend", dragEnd);
-    candy.addEventListener("dragover", dragOver);
-    candy.addEventListener("dragenter", dragEnter);
-    candy.addEventListener("dragleave", dragLeave);
-    candy.addEventListener("drop", dragDrop);
-});
+    if (
+        card1.getAttribute("data-id") === card2.getAttribute("data-id") &&
+        card1.getAttribute("data-type") !== card2.getAttribute("data-type")
+    ) {
+        card1.classList.remove("bg-yellow-400");
+        card1.classList.add("bg-green-500");
+        card2.classList.remove("bg-yellow-400");
+        card2.classList.add("bg-green-500");
 
-function dragStart() {
-    candyBeingDragged = this;
-}
-
-function dragEnd() {
-    const validMoves = [
-        parseInt(candyBeingDragged.id) - 1,
-        parseInt(candyBeingDragged.id) + 1,
-        parseInt(candyBeingDragged.id) - gridSize,
-        parseInt(candyBeingDragged.id) + gridSize,
-    ];
-    const replacedId = parseInt(candyBeingReplaced.id);
-
-    if (validMoves.includes(replacedId)) {
-        const draggedClass = candyBeingDragged.className;
-        const replacedClass = candyBeingReplaced.className;
-
-        candyBeingDragged.className = replacedClass;
-        candyBeingReplaced.className = draggedClass;
-
-        checkMatches();
-        dropCandies();
+        score += 10;
+        scoreDisplay.textContent = score;
     } else {
-        candyBeingDragged.className = candyBeingDragged.className;
+        setTimeout(() => {
+            card1.classList.remove("bg-yellow-400");
+            card1.classList.add("bg-blue-500");
+            card2.classList.remove("bg-yellow-400");
+            card2.classList.add("bg-blue-500");
+        }, 1000);
     }
+
+    flippedCards = [];
 }
 
-function dragOver(e) {
-    e.preventDefault();
-}
-
-function dragEnter(e) {
-    e.preventDefault();
-}
-
-function dragLeave() {}
-
-function dragDrop() {
-    candyBeingReplaced = this;
-}
-
-// Démarrer le jeu
+// Démarre le jeu
 createGrid();
-setInterval(() => {
-    checkMatches();
-    dropCandies();
-}, 1000);
