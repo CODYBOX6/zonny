@@ -1,8 +1,9 @@
+// Liste des notes sur le Builder
 const notes = [
     {
         title: "Définition du Builder",
         content: `
-<p>Le <span class="text-yellow-400 font-semibold">Builder</span> est un <span class="font-bold">design pattern</span> qui permet de construire des objets complexes de manière étape par étape.</p>
+<p>Le <span class="text-yellow-400 font-semibold">Builder</span> est un <span class="font-bold">design pattern</span> qui permet de construire des objets complexes étape par étape.</p>
 <p>Il est particulièrement utile lorsque les objets possèdent de nombreux paramètres optionnels ou imbriqués.</p>
         `,
         analogy: "Construire une pizza : chaque ingrédient est ajouté étape par étape selon les préférences.",
@@ -72,9 +73,11 @@ public class Pizza {
     },
 ];
 
-// Conteneur pour les notes interactives
+// Conteneurs pour les notes et le quiz
 const notesContainer = document.getElementById("notes-container");
+const quizContainer = document.getElementById("quiz-container");
 
+// Génération des notes interactives
 notes.forEach(note => {
     const card = document.createElement("div");
     card.classList.add("bg-gray-800", "rounded-lg", "shadow-lg", "p-6", "overflow-hidden");
@@ -100,56 +103,78 @@ notes.forEach(note => {
     notesContainer.appendChild(card);
 });
 
-// Ajout d'un quiz interactif
-const quizContainer = document.getElementById("quiz-container");
+// Quiz interactif
+const quizQuestions = [
+    {
+        question: "Quelle méthode est utilisée pour finaliser la création d'un objet dans le Builder Pattern ?",
+        options: [
+            { text: "create()", correct: false },
+            { text: "construct()", correct: false },
+            { text: "build()", correct: true },
+            { text: "finalize()", correct: false },
+        ],
+    },
+    {
+        question: "Quelle est la principale utilité du design pattern Builder ?",
+        options: [
+            { text: "Créer des objets complexes étape par étape", correct: true },
+            { text: "Assurer qu'une classe n'a qu'une seule instance", correct: false },
+            { text: "Partager une ressource unique entre plusieurs classes", correct: false },
+            { text: "Organiser les classes dans une hiérarchie", correct: false },
+        ],
+    },
+    {
+        question: "Dans quel cas le Builder est particulièrement utile ?",
+        options: [
+            { text: "Pour gérer des objets simples avec peu de paramètres", correct: false },
+            { text: "Pour gérer des objets avec de nombreux paramètres optionnels", correct: true },
+            { text: "Pour assurer la synchronisation entre plusieurs threads", correct: false },
+            { text: "Pour cacher la logique de création derrière une interface", correct: false },
+        ],
+    },
+];
 
-const quizQuestion = {
-    question: "Quelle méthode est utilisée pour finaliser la création d'un objet dans le Builder Pattern ?",
-    options: [
-        { text: "create()", correct: false },
-        { text: "construct()", correct: false },
-        { text: "build()", correct: true },
-        { text: "finalize()", correct: false },
-    ],
-};
+// Génération du quiz interactif
+quizQuestions.forEach((quiz, index) => {
+    const card = document.createElement("div");
+    card.classList.add("bg-gray-800", "rounded-lg", "shadow-lg", "p-6");
 
-const questionCard = document.createElement("div");
-questionCard.classList.add(
-    "bg-gray-800",
-    "rounded-lg",
-    "shadow-lg",
-    "p-6",
-    "text-center",
-    "text-gray-300"
-);
+    // Question
+    const question = document.createElement("h2");
+    question.classList.add("text-lg", "font-bold", "text-yellow-400", "mb-4");
+    question.textContent = `Q${index + 1}: ${quiz.question}`;
+    card.appendChild(question);
 
-const questionText = document.createElement("p");
-questionText.textContent = quizQuestion.question;
-questionText.classList.add("mb-4", "text-lg");
+    // Options
+    quiz.options.forEach(option => {
+        const button = document.createElement("button");
+        button.textContent = option.text;
+        button.classList.add(
+            "block",
+            "bg-yellow-400",
+            "hover:bg-yellow-500",
+            "text-gray-900",
+            "font-bold",
+            "py-2",
+            "px-4",
+            "rounded",
+            "mb-2",
+            "w-full",
+            "transition"
+        );
 
-questionCard.appendChild(questionText);
+        button.addEventListener("click", () => {
+            if (option.correct) {
+                button.classList.add("bg-green-500");
+                alert("Bonne réponse !");
+            } else {
+                button.classList.add("bg-red-500");
+                alert("Mauvaise réponse. Réessayez !");
+            }
+        });
 
-quizQuestion.options.forEach(option => {
-    const button = document.createElement("button");
-    button.textContent = option.text;
-    button.classList.add(
-        "block",
-        "bg-yellow-400",
-        "hover:bg-yellow-500",
-        "text-gray-900",
-        "font-bold",
-        "py-2",
-        "px-4",
-        "rounded",
-        "mb-2",
-        "w-full"
-    );
-
-    button.addEventListener("click", () => {
-        alert(option.correct ? "Bonne réponse ! 🎉" : "Mauvaise réponse. Réessaie !");
+        card.appendChild(button);
     });
 
-    questionCard.appendChild(button);
+    quizContainer.appendChild(card);
 });
-
-quizContainer.appendChild(questionCard);
