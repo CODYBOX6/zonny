@@ -90,6 +90,9 @@ const memoryPairs = notes.map(note => ({
 
 const shuffledPairs = [...memoryPairs, ...memoryPairs].sort(() => 0.5 - Math.random());
 
+let flippedCards = [];
+let matchedPairs = 0;
+
 shuffledPairs.forEach((pair, index) => {
     const card = document.createElement("div");
     card.classList.add(
@@ -106,13 +109,47 @@ shuffledPairs.forEach((pair, index) => {
         "hover:scale-105"
     );
     card.setAttribute("data-index", index);
-    card.textContent = pair.question || pair.answer;
+    card.setAttribute("data-pair", pair.question || pair.answer); // Associe la paire
+    card.textContent = "🔒"; // Cache le contenu initialement
 
-    // Memory game logic
+    // Ajoute la logique de retournement
     card.addEventListener("click", () => {
-        card.classList.toggle("bg-yellow-400");
-        card.classList.toggle("bg-green-500");
+        if (flippedCards.length < 2 && !card.classList.contains("matched")) {
+            card.textContent = pair.question || pair.answer; // Affiche le contenu
+            card.classList.add("flipped");
+
+            flippedCards.push(card);
+
+            // Vérifie les paires si 2 cartes sont retournées
+            if (flippedCards.length === 2) {
+                setTimeout(checkForMatch, 1000);
+            }
+        }
     });
 
     memoryContainer.appendChild(card);
 });
+
+// Vérifie si les deux cartes retournées correspondent
+function checkForMatch() {
+    const [card1, card2] = flippedCards;
+
+    if (card1.getAttribute("data-pair") === card2.getAttribute("data-pair")) {
+        // Correspondance trouvée
+        card1.classList.add("matched", "bg-green-500");
+        card2.classList.add("matched", "bg-green-500");
+        matchedPairs++;
+
+        if (matchedPairs === memoryPairs.length) {
+            setTimeout(() => alert("🎉 Félicitations ! Vous avez trouvé toutes les paires !"), 500);
+        }
+    } else {
+        // Pas de correspondance, retourne les cartes
+        card1.textContent = "🔒";
+        card2.textContent = "🔒";
+        card1.classList.remove("flipped");
+        card2.classList.remove("flipped");
+    }
+
+    flippedCards = [];
+}
