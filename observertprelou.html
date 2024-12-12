@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Implémentation du Pattern Observer – Grandes Cartes</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Prism CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" />
+
+<style>
+.card-container {
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.card {
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+.card-content {
+  overflow: auto;
+}
+
+/* Scrollbar personnalisée */
+.card-content::-webkit-scrollbar {
+  width: 8px;
+}
+.card-content::-webkit-scrollbar-thumb {
+  background-color: #4a5568;
+  border-radius: 4px;
+}
+.card-content::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+</style>
+
+</head>
+<body class="bg-gray-800 text-gray-200 font-sans">
+
+<section class="max-w-3xl mx-auto p-6 mt-6 bg-gray-700 rounded shadow-sm">
+  <h2 class="text-xl font-semibold mb-4">Suivez les cartes ci-dessous</h2>
+  <p class="mb-4">
+    Chaque carte présente d'abord ce qu'on va faire (recto), ainsi que les méthodes et attributs clés avec de brèves explications. 
+    En cliquant sur une carte, vous voyez le code implémenté (verso). 
+  </p>
+</section>
+
+<!-- On met toutes les cartes en une seule colonne, les unes sous les autres -->
+<section class="max-w-[60rem] mx-auto p-6 space-y-10">
+
+  <!-- Carte Étape 1 : Salle -->
+  <div class="card-container w-[50rem] h-[60rem] bg-gray-900 rounded shadow-lg relative mx-auto">
+    <div class="card w-full h-full">
+      <!-- Recto (face) -->
+      <div class="card-face flex flex-col p-8 bg-gray-800 rounded">
+        <h3 class="text-3xl font-bold mb-4">Étape 1 : La classe <span class="text-yellow-300">Salle</span></h3>
+        <p class="mb-4 text-lg">Actions prévues :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            🏗 <span class="font-semibold">Définir</span> la classe <span class="text-yellow-300 font-semibold">Salle</span> avec ses attributs (nom, batiment, nbMax, etc.)
+          </li>
+          <li>
+            🧱 Ajouter un <span class="text-yellow-300 font-semibold">PropertyChangeSupport</span> pour gérer les notifications
+          </li>
+          <li>
+            🔨 Implémenter le <span class="text-yellow-300 font-semibold">Builder</span> interne pour créer une salle facilement
+          </li>
+          <li>
+            🚨 Ajouter un <span class="text-yellow-300 font-semibold">seuil d’alerte</span> et la méthode <span class="text-yellow-300 font-semibold">checkAlerte()</span>
+          </li>
+          <li>
+            💡 Appeler <span class="text-yellow-300 font-semibold">firePropertyChange</span> dans <span class="text-yellow-300 font-semibold">entree()/sortie()</span> pour notifier les changements
+          </li>
+        </ul>
+        <p class="mt-6 text-lg">Attributs et Méthodes clés :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            <span class="text-yellow-300 font-semibold">private PropertyChangeSupport pcs;</span> - Gère les notifications des changements
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">public void entree()</span> - Augmente le nombre de personnes et notifie
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">public void sortie()</span> - Diminue le nombre de personnes et notifie
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">private void checkAlerte()</span> - Vérifie si le seuil d’alerte est dépassé
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">public static class Builder</span> - Builder pour créer une instance de <span class="text-yellow-300 font-semibold">Salle</span>
+          </li>
+        </ul>
+        <p class="text-sm text-gray-400 italic mt-4">Cliquez pour voir le code implémenté.</p>
+      </div>
+      <!-- Verso (back) -->
+      <div class="card-face card-back bg-gray-900 text-white rounded p-4 flex flex-col">
+        <h3 class="text-xl font-semibold mb-4">Code de <span class="text-yellow-300">Salle</span> avec commentaires</h3>
+        <div class="card-content bg-gray-800 rounded p-2 overflow-auto text-sm h-full">
+          <pre class="language-java text-sm leading-normal"><code>
+package domaine;
+
+import metier.DetecteurBadge;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
+
+public class Salle {
+    private String nom;
+    private String batiment;
+    private int nbMax;
+    private int nbPers;
+    private String configuration;
+    private int longueur;
+    private int largeur;
+    private boolean auditoire;
+    private boolean projecteur;
+    private boolean pupitre;
+    private int nbTables;
+    private int nbChaises;
+    private int nbPCs;
+    private String remarques;
+
+    // Ajout du PropertyChangeSupport pour notifier les listeners
+    private PropertyChangeSupport pcs;
+
+    // Seuil d'alerte et booléen pour éviter double alerte
+    private int seuilAlerte = 50;
+    private boolean alerteDonnee = false;
+
+    // Constructeur privé, utilisation via le builder interne
+    private Salle(String nom, String batiment, int nbMax, int nbPers, String configuration, int longueur, int largeur,
+                  boolean auditoire, boolean projecteur, boolean pupitre,
+                  int nbTables, int nbChaises, int nbPCs, String remarques, int seuilAlerte) {
+        this.nom = nom;
+        this.batiment = batiment;
+        this.nbMax = nbMax;
+        this.nbPers = nbPers;
+        this.configuration = configuration;
+        this.longueur = longueur;
+        this.largeur = largeur;
+        this.auditoire = auditoire;
+        this.projecteur = projecteur;
+        this.pupitre = pupitre;
+        this.nbTables = nbTables;
+        this.nbChaises = nbChaises;
+        this.nbPCs = nbPCs;
+        this.remarques = remarques;
+        this.seuilAlerte = seuilAlerte;
+
+        pcs = new PropertyChangeSupport(this);
+
+        new DetecteurBadge(this).start(); // Démarrer le détecteur de badge
+    }
+
+    // Méthode d’entrée simple
+    public void entree() {
+        int oldValue = this.nbPers;
+        this.nbPers++;
+        pcs.firePropertyChange("nbPers", oldValue, this.nbPers); // Notifier le changement
+        checkAlerte();
+    }
+
+    // Méthode de sortie simple
+    public void sortie() {
+        int oldValue = this.nbPers;
+        this.nbPers--;
+        pcs.firePropertyChange("nbPers", oldValue, this.nbPers); // Notifier le changement
+        checkAlerte();
+    }
+
+    // Méthode d’entrée avec nombre de personnes
+    public void entree(int nbPers) {
+        int oldValue = this.nbPers;
+        this.nbPers += nbPers;
+        pcs.firePropertyChange("nbPers", oldValue, this.nbPers); // Notifier le changement
+        checkAlerte();
+    }
+
+    // Méthode de sortie avec nombre de personnes
+    public void sortie(int nbPers) {
+        int oldValue = this.nbPers;
+        this.nbPers -= nbPers;
+        pcs.firePropertyChange("nbPers", oldValue, this.nbPers); // Notifier le changement
+        checkAlerte();
+    }
+
+    // Calcul du taux d'occupation
+    public int getTaux() {
+        return nbMax == 0 ? 0 : nbPers * 100 / nbMax;
+    }
+
+    @Override
+    public String toString() {
+        return nom + ": " + nbPers + " personnes (
+
+max: " + nbMax + ")";
+    }
+
+    // Méthode pour vérifier si le seuil d’alerte est dépassé
+    private void checkAlerte() {
+        int taux = getTaux();
+        if (taux > seuilAlerte && !alerteDonnee) {
+            prevenirResponsable(this);
+            alerteDonnee = true;
+        }
+    }
+
+    // Méthode pour prévenir le responsable en cas d’alerte
+    private static void prevenirResponsable(Salle salle) {
+        System.out.println("Attention, " + salle + " est remplie à " + salle.getTaux() + "%");
+    }
+
+    // Méthode pour ajouter un PropertyChangeListener
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        pcs.addPropertyChangeListener(l);
+    }
+
+    // Méthode pour retirer un PropertyChangeListener
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        pcs.removePropertyChangeListener(l);
+    }
+
+    // Inner class statique Builder pour créer une instance de Salle
+    public static class Builder {
+        private String nom;
+        private String batiment;
+        private int nbMax;
+        private String configuration;
+        private int longueur;
+        private int largeur;
+        private boolean auditoire;
+        private boolean projecteur;
+        private boolean pupitre;
+        private int nbTables;
+        private int nbChaises;
+        private int nbPCs;
+        private String remarques;
+        private int seuilAlerte = 50; // Valeur par défaut
+
+        public Builder(String nom, int nbMax) {
+            this.nom = nom;
+            this.nbMax = nbMax;
+        }
+
+        public Builder setBatiment(String batiment) { this.batiment = batiment; return this; }
+        public Builder setConfiguration(String configuration) { this.configuration = configuration; return this; }
+        public Builder setLongueur(int longueur) { this.longueur = longueur; return this; }
+        public Builder setLargeur(int largeur) { this.largeur = largeur; return this; }
+        public Builder setAuditoire(boolean auditoire) { this.auditoire = auditoire; return this; }
+        public Builder setProjecteur(boolean projecteur) { this.projecteur = projecteur; return this; }
+        public Builder setPupitre(boolean pupitre) { this.pupitre = pupitre; return this; }
+        public Builder setNbTables(int nbTables) { this.nbTables = nbTables; return this; }
+        public Builder setNbChaises(int nbChaises) { this.nbChaises = nbChaises; return this; }
+        public Builder setNbPCs(int nbPCs) { this.nbPCs = nbPCs; return this; }
+        public Builder setRemarques(String remarques) { this.remarques = remarques; return this; }
+        public Builder setSeuilAlerte(int seuilAlerte) { this.seuilAlerte = seuilAlerte; return this; }
+
+        public Salle build() {
+            return new Salle(nom, batiment, nbMax, 0, configuration, longueur, largeur,
+                    auditoire, projecteur, pupitre,
+                    nbTables, nbChaises, nbPCs, remarques, seuilAlerte);
+        }
+    }
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+
+  <!-- Carte Étape 2 : PanneauAffichage -->
+  <div class="card-container w-[50rem] h-[60rem] bg-gray-900 rounded shadow-lg relative mx-auto">
+    <div class="card w-full h-full">
+      <!-- Recto -->
+      <div class="card-face flex flex-col p-8 bg-gray-800 rounded">
+        <h3 class="text-3xl font-bold mb-4">Étape 2 : <span class="text-yellow-300">PanneauAffichage</span></h3>
+        <p class="mb-4 text-lg">Actions prévues :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            🖥️ <span class="font-semibold">Créer</span> une classe <span class="text-yellow-300 font-semibold">PanneauAffichage</span> qui étend <span class="text-yellow-300 font-semibold">JFrame</span>
+          </li>
+          <li>
+            👂 <span class="font-semibold">S’abonner</span> à la salle via <span class="text-yellow-300 font-semibold">PropertyChangeListener</span>
+          </li>
+          <li>
+            🔄 <span class="font-semibold">Actualiser</span> le <span class="text-yellow-300 font-semibold">JLabel</span> en fonction de <span class="text-yellow-300 font-semibold">nbPers</span> dès que la propriété change
+          </li>
+        </ul>
+        <p class="mt-6 text-lg">Attributs et Méthodes clés :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            <span class="text-yellow-300 font-semibold">private Salle salle;</span> - Référence à la salle observée
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">public PanneauAffichage(Salle salle)</span> - Constructeur qui s'abonne aux changements de la salle
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">public void propertyChange(PropertyChangeEvent evt)</span> - Méthode appelée lors d'un changement de propriété
+          </li>
+        </ul>
+        <p class="text-sm text-gray-400 italic mt-4">Cliquez pour voir le code implémenté.</p>
+      </div>
+      <!-- Verso (back) -->
+      <div class="card-face card-back bg-gray-900 text-white rounded p-4 flex flex-col">
+        <h3 class="text-xl font-semibold mb-4">Code de <span class="text-yellow-300">PanneauAffichage</span> avec commentaires</h3>
+        <div class="card-content bg-gray-800 rounded p-2 overflow-auto text-sm h-full">
+          <pre class="language-java text-sm leading-normal"><code>
+package vue;
+
+import domaine.Salle;
+import javax.swing.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener; 
+
+public class PanneauAffichage extends JFrame implements PropertyChangeListener {
+    private JPanel panel;
+    private JLabel lblTexte;
+    private Salle salle; // Référence à la salle observée
+
+    public PanneauAffichage(Salle salle) {
+        setType(Type.UTILITY);
+        setTitle("Remplissage de la salle");
+        setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setContentPane(panel);
+
+        this.salle = salle;
+        this.salle.addPropertyChangeListener(this); // S'abonner aux changements
+
+        lblTexte.setText(salle.toString()); // Affichage initial
+        pack();
+    }
+
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        if ("nbPers".equals(evt.getPropertyName())) {
+            lblTexte.setText(salle.toString()); // Mise à jour du label
+            pack();
+        }
+    }
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte Étape 3 : Main -->
+  <div class="card-container w-[50rem] h-[60rem] bg-gray-900 rounded shadow-lg relative mx-auto">
+    <div class="card w-full h-full">
+      <!-- Recto -->
+      <div class="card-face flex flex-col p-8 bg-gray-800 rounded">
+        <h3 class="text-3xl font-bold mb-4">Étape 3 : <span class="text-yellow-300">Main</span></h3>
+        <p class="mb-4 text-lg">Actions prévues :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            🏭 <span class="font-semibold">Utiliser</span> le <span class="text-yellow-300 font-semibold">Builder</span> pour créer des salles (Aula, C301, B2.15)
+          </li>
+          <li>
+            👀 <span class="font-semibold">Afficher</span> certaines salles via <span class="text-yellow-300 font-semibold">PanneauAffichage</span>
+          </li>
+          <li>
+            🚶 <span class="font-semibold">Entrer et sortir</span> des personnes (<span class="text-yellow-300 font-semibold">entree()/sortie()</span>) et observer la réaction
+          </li>
+          <li>
+            ⚠️ Gestion du <span class="text-yellow-300 font-semibold">seuil d’alerte</span> (50% pour Aula, 70% pour C301)
+          </li>
+        </ul>
+        <p class="mt-6 text-lg">Attributs et Méthodes clés :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            <span class="text-yellow-300 font-semibold">public static void main(String[] args)</span> - Point d'entrée de l'application
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">Salle aula, c301, b215;</span> - Instances des différentes salles
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">aula.entree(int nbPers)</span> - Méthode pour ajouter des personnes à la salle
+          </li>
+          <li>
+            <span class="text-yellow-300 font-semibold">aula.sortie(int nbPers)</span> - Méthode pour retirer des personnes de la salle
+          </li>
+        </ul>
+        <p class="text-sm text-gray-400 italic mt-4">Cliquez pour voir le code implémenté.</p>
+      </div>
+      <!-- Verso (back) -->
+      <div class="card-face card-back bg-gray-900 text-white rounded p-4 flex flex-col">
+        <h3 class="text-xl font-semibold mb-4">Code du <span class="text-yellow-300">Main</span> avec commentaires</h3>
+        <div class="card-content bg-gray-800 rounded p-2 overflow-auto text-sm h-full">
+          <pre class="language-java text-sm leading-normal"><code>
+import domaine.Salle;
+import vue.PanneauAffichage;
+
+public class Main {
+    public static void main(String[] args) {
+        // Création de la salle Aula avec seuil d’alerte à 50%
+        Salle aula = new Salle.Builder("Aula - Auditoire", 380)
+                .setBatiment("B")
+                .setAuditoire(true)
+                .setSeuilAlerte(50)
+                .build();
+        new PanneauAffichage(aula).setVisible(true);
+        aula.entree(180); // Entrée de 180 personnes, déclenche potentielle alerte
+        aula.sortie(30);  // Sortie de 30 personnes
+        aula.entree(50);  // Entrée de 50 personnes
+
+        // Création de la salle C301 avec seuil d’alerte à 70%
+        Salle c301 = new Salle.Builder("C301", 80)
+                .setSeuilAlerte(70)
+                .build();
+        new PanneauAffichage(c301).setVisible(true);
+        c301.entree(30); // Entrée de 30 personnes, déclenche potentielle alerte
+
+        // Création de la salle B2.15 sans panneau, seuil d’alerte à 50%
+        Salle b215 = new Salle.Builder("B2.15", 48)
+                .setBatiment("B")
+                .setProjecteur(true)
+                .setNbTables(24)
+                .setNbChaises(50)
+                .build();
+        b215.entree(20); // Entrée de 20 personnes, déclenche potentielle alerte
+    }
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte Récap Finale -->
+  <div class="card-container w-[50rem] h-[60rem] bg-gray-900 rounded shadow-lg relative mx-auto">
+    <div class="card w-full h-full">
+      <!-- Recto -->
+      <div class="card-face flex flex-col p-8 bg-gray-800 rounded">
+        <h3 class="text-3xl font-bold mb-4">Récapitulatif</h3>
+        <p class="mb-4 text-lg">Pour un débutant :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>🧱 <span class="font-semibold">Définir</span> une classe source (<span class="text-yellow-300 font-semibold">Salle</span>) avec <span class="text-yellow-300 font-semibold">PropertyChangeSupport</span></li>
+          <li>👂 <span class="font-semibold">Créer</span> un observateur (<span class="text-yellow-300 font-semibold">PropertyChangeListener</span>) comme <span class="text-yellow-300 font-semibold">PanneauAffichage</span></li>
+          <li>📢 <span class="font-semibold">Appeler</span> <span class="text-yellow-300 font-semibold">firePropertyChange</span> dans les setters pour notifier les changements</li>
+          <li>🔗 <span class="font-semibold">Abonner</span> l’observateur à la source pour recevoir les événements</li>
+          <li>⚡ <span class="font-semibold">Tester</span> en modifiant les valeurs et observer les réactions immédiates</li>
+        </ul>
+        <p class="text-sm text-gray-400 italic mt-4">Cliquez pour un résumé sans code.</p>
+      </div>
+      <!-- Verso (back) -->
+      <div class="card-face card-back bg-gray-900 text-white rounded p-4 flex flex-col">
+        <h3 class="text-xl font-semibold mb-4">Synthèse sans code</h3>
+        <div class="card-content bg-gray-800 rounded p-2 overflow-auto text-sm h-full">
+          <p class="mb-4">
+            Le pattern Observer via <code>PropertyChangeListener</code> permet de séparer la logique de "qui change l’état" (la source) 
+            et "qui réagit" (l’observateur). Cela facilite la maintenance et l'extensibilité du code.
+          </p>
+          <ul class="list-disc list-inside mb-4">
+            <li><span class="text-yellow-300 font-semibold">PropertyChangeSupport</span> centralise la gestion des notifications</li>
+            <li><span class="text-yellow-300 font-semibold">PropertyChangeListener</span> réagit aux changements sans que la source ne les connaisse directement</li>
+            <li><span class="text-yellow-300 font-semibold">firePropertyChange</span> informe tous les observateurs des modifications</li>
+          </ul>
+          <p>
+            C’est un moyen efficace d'appliquer le pattern Observer en Java, permettant une communication fluide entre les objets tout en maintenant une faible couplage.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<footer class="max-w-7xl mx-auto p-6 mt-6 text-center text-sm text-gray-400">
+  © 2024 Implémentation Pattern Observer - Tous droits réservés.
+</footer>
+
+<!-- Prism JS -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
+
+<script>
+// Flip au clic
+document.querySelectorAll('.card-container').forEach((container) => {
+    container.addEventListener('click', () => {
+        const card = container.querySelector('.card');
+        card.classList.toggle('is-flipped');
+    });
+});
+</script>
+
+</body>
+</html>
