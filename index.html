@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design Patterns - Zonny</title>
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+</head>
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
+  
+  <!-- Header -->
+  <header class="bg-blue-600 text-white p-6">
+    <h1 class="text-4xl font-bold text-center">Design Patterns</h1>
+    <p class="text-center text-lg">Apprenez les design patterns avec des exemples interactifs</p>
+  </header>
+  
+  <!-- Main Content -->
+  <main class="flex-grow max-w-4xl mx-auto p-6">
+    <h2 class="text-3xl font-semibold mb-6 text-center">Choisissez un design pattern à apprendre :</h2>
+    
+    <div class="space-y-6">
+      
+      <!-- Pattern Observer 1 -->
+      <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 p-6">
+        <h3 class="text-2xl font-bold mb-2">Pattern Observer - Salle</h3>
+        <p class="mb-4">Implémentation du pattern Observer avec la classe Salle, PanneauAffichage et Main.</p>
+        <a href="observer1.html" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">Voir l'exemple</a>
+      </div>
+      
+      <!-- Pattern Observer 2 -->
+      <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 p-6">
+        <h3 class="text-2xl font-bold mb-2">Pattern Observer - PanneauAffichage</h3>
+        <p class="mb-4">Implémentation du pattern Observer avec la classe PanneauAffichage et l'observateur Salle.</p>
+        <a href="observer2.html" class="inline-block bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 transition">Voir l'exemple</a>
+      </div>
+      
+      <!-- Ajouter d'autres design patterns ici -->
+      <!-- Exemple : Pattern Singleton -->
+      <!--
+      <div class="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 p-6">
+        <h3 class="text-2xl font-bold mb-2">Pattern Singleton</h3>
+        <p class="mb-4">Implémentation du pattern Singleton pour gérer une instance unique d'une classe.</p>
+        <a href="singleton.html" class="inline-block bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 transition">Voir l'exemple</a>
+      </div>
+      -->
+      
+    </div>
+  </main>
+  
+  <!-- Footer -->
+  <footer class="bg-blue-600 text-white p-6 text-center">
+    <p>&copy; 2024 Zonny - Tous droits réservés.</p>
+  </footer>
+  
+</body>
+</html>

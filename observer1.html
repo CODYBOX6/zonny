@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Implémentation du Pattern Observer – Grandes Cartes</title>
+
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Prism CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" />
+
+<style>
+.card-container {
+  perspective: 1000px;
+  cursor: pointer;
+}
+
+.card {
+  transition: transform 0.8s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+
+.card.is-flipped {
+  transform: rotateY(180deg);
+}
+
+.card-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+.card-content {
+  overflow:auto; 
+}
+
+/* Scrollbar personnalisée (si besoin) */
+.card-content::-webkit-scrollbar {
+  width: 8px;
+}
+.card-content::-webkit-scrollbar-thumb {
+  background-color: #4a5568;
+  border-radius: 4px;
+}
+.card-content::-webkit-scrollbar-track {
+  background: #2d3748;
+}
+</style>
+
+</head>
+<body class="bg-gray-800 text-gray-200 font-sans">
+
+<section class="max-w-3xl mx-auto p-6 mt-6 bg-gray-700 rounded shadow-sm">
+  <h2 class="text-xl font-semibold mb-4">Suivez les cartes ci-dessous</h2>
+  <p class="mb-4">
+    Chaque carte présente d'abord ce qu'on va faire (recto), puis le code implémenté (verso).
+    Cliquez sur une carte pour la retourner et voir le code final.
+  </p>
+</section>
+  <!-- Navigation -->
+  <section class="mb-8">
+    <a href="index.html" class="text-blue-400 hover:underline">&larr; Retour à l'accueil</a>
+    <h2 class="text-2xl font-semibold mt-4">Implémentation du Pattern Observer</h2>
+    <p class="mt-2">Cette page présente une implémentation du pattern Observer utilisant la classe <code>Salle</code>, <code>PanneauAffichage</code>, et <code>Main</code>.</p>
+  </section>
+<!-- On met toutes les cartes en une seule colonne, les unes sous les autres -->
+<section class="max-w-[60rem] mx-auto p-6 space-y-10">
+
+  <!-- Carte Étape 1 -->
+  <div class="card-container w-[50rem] h-[60rem] bg-gray-900 rounded shadow-lg relative mx-auto">
+    <div class="card w-full h-full">
+      <!-- Recto (face) -->
+      <div class="card-face flex flex-col p-8 bg-gray-800 rounded">
+        <h3 class="text-3xl font-bold mb-4">Étape 1 : ArtefactTerrestre</h3>
+        <p class="mb-4 text-lg">Actions prévues :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            🏗 <span class="font-semibold">Créer une classe</span> 
+            <span class="text-yellow-300 font-semibold">ArtefactTerrestre</span> avec un attribut 
+            <span class="text-yellow-300 font-semibold">umweltPower</span>
+          </li>
+          <li>
+            🧩 Ajouter un 
+            <span class="text-yellow-300 font-semibold">PropertyChangeSupport</span> 
+            pour gérer les notifications
+          </li>
+          <li>
+            🎧 Fournir <span class="text-yellow-300 font-semibold">addPropertyChangeListener</span> 
+            et <span class="text-yellow-300 font-semibold">removePropertyChangeListener</span>
+          </li>
+          <li>
+            🚨 Dans <span class="text-yellow-300 font-semibold">setUmweltPower</span>, appeler 
+            <span class="text-yellow-300 font-semibold">firePropertyChange</span> 
+            quand la valeur change
+          </li>
+          <li>
+            🖨 Redéfinir <span class="text-yellow-300 font-semibold">toString</span> pour un affichage lisible
+          </li>
+        </ul>
+        <p class="text-sm text-gray-400 italic mt-4">Cliquez pour voir le code implémenté.</p>
+      </div>
+      <!-- Verso (back) -->
+      <div class="card-face card-back bg-gray-900 text-white rounded p-4 flex flex-col">
+        <h3 class="text-xl font-semibold mb-4">Code de ArtefactTerrestre avec commentaires</h3>
+        <div class="card-content bg-gray-800 rounded p-2 overflow-auto text-sm h-full">
+          <pre class="language-java text-sm leading-normal"><code>
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
+
+class ArtefactTerrestre {
+    private int umweltPower;
+    private PropertyChangeSupport pcs;
+
+    // Le constructeur initialise le PropertyChangeSupport
+    public ArtefactTerrestre() {
+        pcs = new PropertyChangeSupport(this);
+    }
+
+    // Permet à un observateur de s'abonner à la propriété "umweltChange"
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        pcs.addPropertyChangeListener("umweltChange", l);
+    }
+
+    // Permet de se désabonner
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        pcs.removePropertyChangeListener("umweltChange", l);
+    }
+
+    // Setter qui notifie le changement
+    public void setUmweltPower(int umweltPower) {
+        int oldValue = this.umweltPower;
+        this.umweltPower = umweltPower;
+        // Notifie tous les observateurs que la valeur a changé
+        pcs.firePropertyChange("umweltChange", oldValue, umweltPower);
+    }
+
+    @Override
+    public String toString() {
+        return "ArtefactTerrestre{UmweltPower=" + umweltPower + "}";
+    }
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Carte Étape 2 -->
+  <div class="card-container w-[50rem] h-[60rem] bg-gray-900 rounded shadow-lg relative mx-auto">
+    <div class="card w-full h-full">
+      <!-- Recto -->
+      <div class="card-face flex flex-col p-8 bg-gray-800 rounded">
+        <h3 class="text-3xl font-bold mb-4">Étape 2 : Observateur PrincesseKarina</h3>
+        <p class="mb-4 text-lg">Actions prévues :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            👁️ <span class="font-semibold">Créer</span> 
+            <span class="text-yellow-300 font-semibold">PrincesseKarina</span> 
+            qui implémente <span class="text-yellow-300 font-semibold">PropertyChangeListener</span>
+          </li>
+          <li>
+            💬 Dans <span class="text-yellow-300 font-semibold">propertyChange</span>, 
+            afficher un message indiquant que Karina ressent la vibration
+          </li>
+          <li>
+            🔎 Utiliser <span class="text-yellow-300 font-semibold">evt.getOldValue()</span> et 
+            <span class="text-yellow-300 font-semibold">evt.getNewValue()</span> pour décrire le changement
+          </li>
+        </ul>
+        <p class="text-sm text-gray-400 italic mt-4">Cliquez pour voir le code implémenté.</p>
+      </div>
+      <!-- Verso -->
+      <div class="card-face card-back bg-gray-900 text-white rounded p-4 flex flex-col">
+        <h3 class="text-xl font-semibold mb-4">Code de PrincesseKarina avec commentaires</h3>
+        <div class="card-content bg-gray-800 rounded p-2 overflow-auto text-sm h-full">
+          <pre class="language-java text-sm leading-normal"><code>
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeEvent;
+
+class PrincesseKarina implements PropertyChangeListener {
+    @Override
+    public void propertyChange(PropertyChangeEvent evt) {
+        System.out.println("Karina: Ma pierre quantique vibre, un changement est détecté !");
+        System.out.println("Ancienne valeur: " + evt.getOldValue() + " / Nouvelle valeur: " + evt.getNewValue());
+    }
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Carte Étape 3 -->
+  <div class="card-container w-[50rem] h-[60rem] bg-gray-900 rounded shadow-lg relative mx-auto">
+    <div class="card w-full h-full">
+      <!-- Recto -->
+      <div class="card-face flex flex-col p-8 bg-gray-800 rounded">
+        <h3 class="text-3xl font-bold mb-4">Étape 3 : MainStory</h3>
+        <p class="mb-4 text-lg">Actions prévues :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>
+            🚀 <span class="font-semibold">Instancier</span> 
+            <span class="text-yellow-300 font-semibold">ArtefactTerrestre</span>
+          </li>
+          <li>
+            🤝 <span class="font-semibold">Créer</span> une 
+            <span class="text-yellow-300 font-semibold">PrincesseKarina</span> 
+            et l'abonner à l'artefact
+          </li>
+          <li>
+            🔧 Modifier <span class="text-yellow-300 font-semibold">umweltPower</span> 
+            (ex: 0->10, puis 10->25) et observer la réaction
+          </li>
+        </ul>
+        <p class="text-sm text-gray-400 italic mt-4">Cliquez pour voir le code implémenté.</p>
+      </div>
+      <!-- Verso -->
+      <div class="card-face card-back bg-gray-900 text-white rounded p-4 flex flex-col">
+        <h3 class="text-xl font-semibold mb-4">Code de MainStory avec commentaires</h3>
+        <div class="card-content bg-gray-800 rounded p-2 overflow-auto text-sm h-full">
+          <pre class="language-java text-sm leading-normal"><code>
+class MainStory {
+    public static void main(String[] args) {
+        // On crée l'artefact
+        ArtefactTerrestre artefact = new ArtefactTerrestre();
+
+        // On crée Karina et on l'abonne à l'artefact
+        PrincesseKarina karina = new PrincesseKarina();
+        artefact.addPropertyChangeListener(karina);
+
+        // Modification de l'umweltPower
+        // De 0 à 10
+        artefact.setUmweltPower(10); 
+        // Karina réagit (message affiché dans la console)
+
+        // De 10 à 25
+        artefact.setUmweltPower(25);
+        // Karina réagit encore
+    }
+}
+</code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Carte Récap Finale -->
+  <div class="card-container w-[50rem] h-[60rem] bg-gray-900 rounded shadow-lg relative mx-auto">
+    <div class="card w-full h-full">
+      <!-- Recto -->
+      <div class="card-face flex flex-col p-8 bg-gray-800 rounded">
+        <h3 class="text-3xl font-bold mb-4">Récapitulatif</h3>
+        <p class="mb-4 text-lg">Pour un débutant :</p>
+        <ul class="list-inside space-y-2 text-base">
+          <li>🔨 <span class="font-semibold">Définir une classe source</span> avec <span class="text-yellow-300 font-semibold">PropertyChangeSupport</span></li>
+          <li>👂 <span class="font-semibold">Créer un observateur</span> implémentant <span class="text-yellow-300 font-semibold">PropertyChangeListener</span></li>
+          <li>📢 Dans le setter, appeler <span class="text-yellow-300 font-semibold">firePropertyChange</span></li>
+          <li>🔗 <span class="font-semibold">Abonner l’observateur</span> à la source</li>
+          <li>⚡ <span class="font-semibold">Tester</span> en modifiant la valeur pour voir la réaction immédiate</li>
+        </ul>
+        <p class="text-sm text-gray-400 italic mt-4">Cliquez pour un résumé sans code.</p>
+      </div>
+      <!-- Verso -->
+      <div class="card-face card-back bg-gray-900 text-white rounded p-4 flex flex-col">
+        <h3 class="text-xl font-semibold mb-4">Synthèse sans code</h3>
+        <div class="card-content bg-gray-800 rounded p-2 overflow-auto text-sm h-full">
+          <p class="mb-4">
+            Le pattern Observer via <code>PropertyChangeListener</code> permet de séparer qui change l’état (la source) 
+            et qui réagit (l’observateur).
+          </p>
+          <ul class="list-disc list-inside mb-4">
+            <li><span class="text-yellow-300 font-semibold">PropertyChangeSupport</span> centralise la notification</li>
+            <li><span class="text-yellow-300 font-semibold">PropertyChangeListener</span> réagit aux événements</li>
+            <li><span class="text-yellow-300 font-semibold">firePropertyChange</span> informe tous les observateurs</li>
+          </ul>
+          <p>
+            C’est un moyen efficace d'appliquer le pattern Observer en Java.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<footer class="max-w-7xl mx-auto p-6 mt-6 text-center text-sm text-gray-400">
+  © 2024 Implémentation Pattern Observer - Tous droits réservés.
+</footer>
+
+<!-- Prism JS -->
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-java.min.js"></script>
+
+<script>
+// Flip au clic
+document.querySelectorAll('.card-container').forEach((container) => {
+    container.addEventListener('click', () => {
+        const card = container.querySelector('.card');
+        card.classList.toggle('is-flipped');
+    });
+});
+</script>
+
+</body>
+</html>
