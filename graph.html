@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Graphes en Java : Explication Complète 📚🎨</title>
+    <!-- Tailwind CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Prism.js CSS (Tomorrow Theme) -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <!-- Custom Styles -->
+    <style>
+        body {
+            background-color: #fffaf0; /* Beige pastel */
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .card {
+            @apply bg-white rounded-lg shadow-md p-6 mb-6 border-l-4 border-pink-400 cursor-pointer;
+            transition: transform 0.2s;
+        }
+        .card:hover {
+            @apply transform scale-105;
+        }
+        .section-title {
+            @apply text-2xl font-bold mb-4 flex items-center;
+            color: #d81b60; /* Rose vif */
+        }
+        .keyword {
+            color: #6f42c1; /* Violet pastel */
+            font-weight: bold;
+        }
+        .emoji {
+            margin-right: 0.5em;
+            font-size: 1.5em;
+        }
+        .code-content {
+            display: none;
+        }
+        .code-content.active {
+            display: block;
+        }
+        pre {
+            @apply bg-gray-800 text-white p-4 rounded-md overflow-x-auto;
+        }
+        code {
+            @apply text-sm;
+        }
+        /* Responsive grid */
+        @media (min-width: 768px) {
+            .grid-container {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+    </style>
+</head>
+<body class="flex flex-col items-center p-4">
+    <header class="mb-8">
+        <h1 class="text-4xl font-bold text-pink-600">Graphes en Java : Explication Complète 📚🎨</h1>
+    </header>
+
+    <main class="w-full max-w-7xl grid grid-cols-1 gap-6 grid-container">
+        <!-- 1. Introduction -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🗺️</span> 1. Introduction
+            </div>
+            <p>Bienvenue dans cette explication détaillée sur la <span class="keyword">mise en œuvre des graphes en Java</span>. Nous allons explorer :</p>
+            <ul class="list-disc list-inside">
+                <li>Représentation d'un graphe avec des <span class="keyword">types génériques</span> (ex : <code>Personne</code>) en matrice.</li>
+                <li>Représentation d'un graphe avec des <span class="keyword">entiers</span> en matrice et en liste.</li>
+                <li>Ajout des relations, vérification de leur existence, et parcours du graphe en profondeur (DFS).</li>
+                <li>Gestion des cycles dans le graphe.</li>
+            </ul>
+            <div class="code-content">
+                <p class="mt-4"><strong>Objectifs :</strong></p>
+                <ul class="list-disc list-inside">
+                    <li>Comprendre les différentes représentations de graphes en Java.</li>
+                    <li>Implémenter des graphes génériques et non génériques.</li>
+                    <li>Utiliser les algorithmes de parcours DFS et BFS.</li>
+                    <li>Gérer efficacement les cycles dans les graphes.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- 2. Classe Domaine : Personne -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">👥</span> 2. Classe Domaine : Personne
+            </div>
+            <p>La classe <span class="keyword">Personne</span> sert d'exemple de type de nœud pour le graphe générique. Elle est simple et représente une personne avec un nom et un prénom.</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : domaine/Personne.java
+package domaine;
+
+public class Personne {
+    private String nom;
+    private String prenom;
+
+    public Personne(String nom, String prenom) {
+        this.nom = nom;
+        this.prenom = prenom;
+    }
+
+    // Getters & Setters
+    public String getNom() { return nom; }
+    public String getPrenom() { return prenom; }
+
+    public void setNom(String nom) { this.nom = nom; }
+    public void setPrenom(String prenom) { this.prenom = prenom; }
+
+    @Override
+    public String toString() {
+        return prenom + " " + nom;
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 3. Interface Graphe Générique -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🔌</span> 3. Interface Graphe Générique
+            </div>
+            <p>L'interface <code>Graphe&lt;T&gt;</code> définit les opérations de base pour manipuler un graphe générique.</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : metier/Graphe.java
+package metier;
+
+public interface Graphe<T> {
+    void addRelation(T source, T dest);
+    boolean existeRelation(T source, T dest);
+    void parcourirDepuis(T source);
+    // boolean existeChemin(T source, T dest); // optionnel
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 4. GrapheDansUneMatrice<T> -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🧱</span> 4. GrapheDansUneMatrice&lt;T&gt;
+            </div>
+            <p>Implémentation d'un graphe générique en utilisant une <span class="keyword">matrice booléenne</span>. Les nœuds sont stockés dans une liste pour leur associer un indice.</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : metier/GrapheDansUneMatrice.java
+package metier;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+public class GrapheDansUneMatrice<T> implements Graphe<T> {
+    private boolean[][] matriceDesRelations;
+    private List<T> listeDesNoeuds; 
+    private Set<T> dejaPasseParLa;
+
+    public GrapheDansUneMatrice(int nb) {
+        this.matriceDesRelations = new boolean[nb][nb];
+        this.listeDesNoeuds = new ArrayList<>();
+    }
+
+    @Override
+    public void addRelation(T source, T dest) {
+        if (!listeDesNoeuds.contains(source)) listeDesNoeuds.add(source);
+        if (!listeDesNoeuds.contains(dest)) listeDesNoeuds.add(dest);
+
+        int iSource = listeDesNoeuds.indexOf(source);
+        int iDest = listeDesNoeuds.indexOf(dest);
+        matriceDesRelations[iSource][iDest] = true;
+    }
+
+    @Override
+    public boolean existeRelation(T source, T dest) {
+        int iSource = listeDesNoeuds.indexOf(source);
+        int iDest = listeDesNoeuds.indexOf(dest);
+        return matriceDesRelations[iSource][iDest];
+    }
+
+    @Override
+    public void parcourirDepuis(T source) {
+        dejaPasseParLa = new HashSet<>();
+        parcoursRecursif(source);
+    }
+
+    private void parcoursRecursif(T n) {
+        if (dejaPasseParLa.contains(n)) return;
+        dejaPasseParLa.add(n);
+        System.out.print(n + " ");
+
+        int iSource = listeDesNoeuds.indexOf(n);
+        for (int i = 0; i < matriceDesRelations.length; i++) {
+            if (matriceDesRelations[iSource][i]) {
+                parcoursRecursif(listeDesNoeuds.get(i));
+            }
+        }
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 5. Démonstration : Graphe Générique -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">👨‍💻</span> 5. Démonstration : Graphe Générique
+            </div>
+            <p>La classe <code>DemoMatriceTypeGen</code> montre comment utiliser un graphe générique avec la classe <code>Personne</code>.</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : metier/DemoMatriceTypeGen.java
+package metier;
+
+import domaine.Personne;
+
+public class DemoMatriceTypeGen {
+    public DemoMatriceTypeGen() {
+        System.out.println("Démonstration d'un graphe générique en matrice");
+        Graphe<Personne> g = new GrapheDansUneMatrice<>(8);
+        
+        Personne p1 = new Personne("Doe", "John");
+        Personne p2 = new Personne("Smith", "Jane");
+        Personne p3 = new Personne("Brown", "Mike");
+
+        g.addRelation(p1, p2);
+        g.addRelation(p2, p3);
+        g.addRelation(p1, p3);
+
+        System.out.println("Relation entre John Doe et Jane Smith ? " + g.existeRelation(p1, p2));
+        System.out.println("Relation entre Jane Smith et Mike Brown ? " + g.existeRelation(p2, p3));
+        System.out.println("Parcours depuis John Doe :");
+        g.parcourirDepuis(p1);
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 6. Graphe Non Générique -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🧭</span> 6. Graphe Non Générique
+            </div>
+            <p>Représentation d'un graphe où les nœuds sont des <span class="keyword">entiers</span>. Nous avons une interface <code>Graphe</code> (sans générique) et deux implémentations : en liste et en matrice.</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : metier/Graphe.java (non générique)
+package metier;
+
+public interface Graphe {
+    void addRelation(int source, int dest);
+    boolean existeRelation(int source, int dest);
+    void parcourirDepuis(int source);
+    // boolean existeChemin(int source, int dest);
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 7. GrapheDansUneListe (Non Générique) -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🗃️</span> 7. GrapheDansUneListe
+            </div>
+            <p>Implémentation d'un graphe non générique en utilisant une liste de relations. Chaque relation est un tableau <code>int[]</code> représentant [source, dest].</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : metier/GrapheDansUneListe.java
+package metier;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class GrapheDansUneListe implements Graphe {
+    private Set<int[]> lstRelations = new HashSet<>();
+    private Set<Integer> dejaPasseParLa;
+
+    @Override
+    public void addRelation(int source, int dest) {
+        lstRelations.add(new int[]{source, dest});
+    }
+
+    @Override
+    public boolean existeRelation(int source, int dest) {
+        for (int[] r : lstRelations) {
+            if (r[0] == source && r[1] == dest) return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void parcourirDepuis(int source) {
+        dejaPasseParLa = new HashSet<>();
+        parcoursRecursif(source);
+    }
+
+    private void parcoursRecursif(int n) {
+        if (dejaPasseParLa.contains(n)) return;
+        dejaPasseParLa.add(n);
+        System.out.print(n + " ");
+
+        for (int[] r : lstRelations) {
+            if (r[0] == n) parcoursRecursif(r[1]);
+        }
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 8. GrapheDansUneMatrice (Non Générique) -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🏗️</span> 8. GrapheDansUneMatrice (Non Générique)
+            </div>
+            <p>Implémentation d'un graphe non générique en utilisant une <span class="keyword">matrice booléenne</span>. Les indices des nœuds sont leurs valeurs entières.</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : metier/GrapheDansUneMatrice.java (non générique)
+package metier;
+
+import java.util.HashSet;
+import java.util.Set;
+
+public class GrapheDansUneMatrice implements Graphe {
+    private boolean[][] matriceDesRelations;
+    private Set<Integer> dejaPasseParLa;
+
+    public GrapheDansUneMatrice(int nb) {
+        this.matriceDesRelations = new boolean[nb][nb];
+    }
+
+    @Override
+    public void addRelation(int source, int dest) {
+        matriceDesRelations[source][dest] = true;
+    }
+
+    @Override
+    public boolean existeRelation(int source, int dest) {
+        return matriceDesRelations[source][dest];
+    }
+
+    @Override
+    public void parcourirDepuis(int source) {
+        dejaPasseParLa = new HashSet<>();
+        parcoursRecursif(source);
+    }
+
+    private void parcoursRecursif(int n) {
+        if (dejaPasseParLa.contains(n)) return;
+        dejaPasseParLa.add(n);
+        System.out.print(n + " ");
+        for (int i = 0; i < matriceDesRelations[n].length; i++) {
+            if (matriceDesRelations[n][i]) parcoursRecursif(i);
+        }
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 9. Démonstration : Parcours de Graphe -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🕵️</span> 9. Démonstration : Parcours de Graphe
+            </div>
+            <p>La classe <code>DemoParcoursGraphe</code> montre comment utiliser un graphe non générique, ajouter des relations, et parcourir le graphe.</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : metier/DemoParcoursGraphe.java
+package metier;
+
+public class DemoParcoursGraphe {
+    public DemoParcoursGraphe() {
+        System.out.println("Démonstration du parcours d'un graphe");
+        Graphe g = new GrapheDansUneListe(); // Ou new GrapheDansUneMatrice(8);
+
+        g.addRelation(0, 1);
+        g.addRelation(1, 2);
+        g.addRelation(0, 3);
+        g.addRelation(3, 1);
+        g.addRelation(1, 4);
+        g.addRelation(3, 4);
+        g.addRelation(3, 6);
+        g.addRelation(7, 6);
+        g.addRelation(6, 5);
+        g.addRelation(5, 3); // Crée un cycle !
+
+        System.out.println("Existe-t-il une relation entre 0 et 5 ? " + g.existeRelation(0, 5));
+        System.out.println("Existe-t-il une relation entre 3 et 1 ? " + g.existeRelation(3, 1));
+
+        System.out.println("Parcours du graphe depuis le nœud 0 :");
+        g.parcourirDepuis(0);
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 10. Classe Main -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🏁</span> 10. Classe Main
+            </div>
+            <p>La classe <code>Main</code> lance les démonstrations de graphes génériques et non génériques.</p>
+            <div class="code-content">
+                <pre><code class="language-java">
+// Fichier : metier/Main.java
+package metier;
+
+public class Main {
+    public static void main(String[] args) {
+        new DemoParcoursGraphe(); 
+        // ou new DemoMatriceTypeGen();
+    }
+}
+                </code></pre>
+            </div>
+        </div>
+
+        <!-- 11. Conclusion -->
+        <div class="card" onclick="toggleContent(this)">
+            <div class="section-title">
+                <span class="emoji">🔚</span> 11. Conclusion
+            </div>
+            <p>Nous avons exploré :</p>
+            <ul class="list-disc list-inside">
+                <li>Représentation des graphes génériques et non génériques.</li>
+                <li>Ajout et vérification des relations.</li>
+                <li>Parcours en profondeur (DFS) et gestion des cycles.</li>
+            </ul>
+            <p>Ces concepts sont fondamentaux pour manipuler des structures de données complexes en Java. Continuez à pratiquer pour maîtriser ces implémentations ! 🚀</p>
+            <div class="code-content">
+                <p>Merci d'avoir suivi cette explication détaillée sur les graphes en Java. N'hésitez pas à consulter les exemples de code pour mieux comprendre chaque concept. Bonne étude et bonne chance pour votre examen ! 🍀📘</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript pour gérer l'affichage des contenus des cartes -->
+    <script>
+        function toggleContent(card) {
+            const content = card.querySelector('.code-content');
+            content.classList.toggle('active');
+        }
+    </script>
+
+    <!-- Prism.js JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-java.min.js"></script>
+</body>
+</html>
